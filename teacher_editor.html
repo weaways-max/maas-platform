@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الاختبارات | منصة القياسات الذكية</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Header */
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .logo-main {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+
+        .workspace {
+            flex: 1;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: white;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-family: 'Cairo';
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-publish {
+            background: var(--success);
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .question-block {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-right: 5px solid var(--primary);
+        }
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: left;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            text-align: center;
+        }
+        .link-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: right;
+        }
+        .export-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>🛠️ إنشاء اختبار جديد</h2>
+        
+        <div class="form-group">
+            <label>عنوان الاختبار</label>
+            <input type="text" id="ex-title-input" placeholder="مثلاً: اختبار الرياضيات">
+        </div>
+        
+        <div class="form-group">
+            <label>كود المادة</label>
+            <input type="text" id="ex-code-input" placeholder="مثلاً: MATH101">
+        </div>
+        
+        <div class="form-group">
+            <label>المدة (دقائق)</label>
+            <input type="number" id="ex-time-input" value="30">
+        </div>
+        
+        <button class="btn btn-add" onclick="addBlock('mcq')">➕ سؤال اختياري</button>
+        <button class="btn btn-add" onclick="addBlock('truefalse')">➕ سؤال صح أو خطأ</button>
+        <button class="btn btn-add" onclick="addBlock('essay')">➕ سؤال مقالي</button>
+        
+        <div class="export-section" style="margin-top: 30px; padding: 20px; background: #f0f7ff; border-radius: 15px; border: 2px solid #e2e8f0;">
+            <h3 style="margin-bottom: 15px; color: var(--primary); font-weight: 800;">📄 تصدير الاختبار</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn" style="background: var(--danger); flex: 1;" onclick="exportToPDF()">
+                    📄 نسخ PDF
+                </button>
+                <button class="btn" style="background: var(--info); flex: 1;" onclick="exportToWord()">
+                    📄 نسخ Word
+                </button>
+                <button class="btn" style="background: var(--warning); flex: 1;" onclick="printExam()">
+                    🖨️ طباعة
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; border: 2px solid #e2e8f0;">
+            <h4 style="margin: 0 0 10px 0; color: var(--primary); font-weight: 800;">🔗 روابط سريعة</h4>
+            <a href="teacher_dashboard.html" class="btn" style="background: var(--secondary); width: 100%; margin-bottom: 10px;">
+                🏠 لوحة المعلم
+            </a>
+            <a href="home.html" class="btn" style="background: var(--info); width: 100%;">
+                🏠 الصفحة الرئيسية
+            </a>
+            <a href="exam_codes.html" class="btn" style="background: var(--warning); width: 100%;">
+                🔑 أكواد الاختبارات
+            </a>
+        </div>
+
+        <button class="btn btn-publish" onclick="publishExam()">🚀 نشر الاختبار</button>
+    </aside>
+
+    <main class="workspace">
+        <div id="blocks-container">
+            <h3>سيتم عرض الأسئلة هنا...</h3>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-content">
+            <h1 style="color: var(--success);">✅ تم النشر بنجاح!</h1>
+            <p>تم حفظ الاختبار وتوليد الروابط:</p>
+            
+            <div class="link-container">
+                <strong>🔗 رابط الطلاب:</strong>
+                <div id="res-student-url" style="word-break: break-all; margin: 10px 0;">---</div>
+                <button class="btn" onclick="copyText('res-student-url')">نسخ الرابط</button>
+            </div>
+            
+            <div class="link-container">
+                <strong>📊 لوحة التحكم:</strong>
+                <div id="res-admin-url" style="word-break: break-all; margin: 10px 0;">---</div>
+                <button class="btn" onclick="copyText('res-admin-url')">نسخ الرابط</button>
+            </div>
+            
+            <button class="btn btn-add" onclick="location.reload()">إنشاء اختبار جديد</button>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://hnldjfcvztnrhkwjmetf.supabase.co', 'sb_publishable_ldtY51QgRs0yg8sxnqhIkA_0qKvVXMU');
+        let blocks = [];
+        let currentUserId = null;
+
+        (async function checkAuth() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUserId = session.user.id;
+        })();
+
+        function addBlock(type) {
+            const id = 'blk_' + Math.random().toString(36).substr(2, 9);
+            const newBlock = {
+                id: id,
+                type: type,
+                content: '',
+                options: ['', '', '', '', ''],
+                correct: '',
+                points: 1
+            };
+            blocks.push(newBlock);
+            renderWorkspace();
+        }
+
+        function renderWorkspace() {
+            const container = document.getElementById('blocks-container');
+            container.innerHTML = '';
+
+            blocks.forEach((b, i) => {
+                const div = document.createElement('div');
+                div.className = 'block-card';
+                
+                let html = `
+                    <button class="delete-btn" onclick="removeBlock(${i})">حذف</button>
+                    <h4>السؤال ${i + 1}: ${b.type === 'mcq' ? 'اختياري' : b.type === 'truefalse' ? 'صح أو خطأ' : 'مقالي'}</h4>
+                    <textarea placeholder="اكتب السؤال هنا..." oninput="blocks[${i}].content=this.value">${b.content}</textarea>
+                `;
+
+                if (b.type === 'mcq') {
+                    html += `
+                        <div style="margin: 15px 0;">
+                            <label>الخيارات:</label>
+                            <input type="text" placeholder="الخيار الأول" oninput="blocks[${i}].options[0]=this.value" value="${b.options[0]}">
+                            <input type="text" placeholder="الخيار الثاني" oninput="blocks[${i}].options[1]=this.value" value="${b.options[1]}">
+                            <input type="text" placeholder="الخيار الثالث" oninput="blocks[${i}].options[2]=this.value" value="${b.options[2]}">
+                            <input type="text" placeholder="الخيار الرابع" oninput="blocks[${i}].options[3]=this.value" value="${b.options[3]}">
+                        </div>
+                        <div>
+                            <label>الإجابة الصحيحة:</label>
+                            <select onchange="blocks[${i}].correct=this.value">
+                                <option value="">اختر</option>
+                                ${b.options.filter(o => o.trim()).map(o => `<option value="${o}" ${b.correct === o ? 'selected' : ''}>${o}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else if (b.type === 'truefalse') {
+                    html += `
+                        <div>
+                            <label>الإجابة الصحيحة:</label>
+                            <select onchange="blocks[${i}].correct=this.value">
+                                <option value="">اختر</option>
+                                <option value="صح" ${b.correct === 'صح' ? 'selected' : ''}>صح</option>
+                                <option value="خطأ" ${b.correct === 'خطأ' ? 'selected' : ''}>خطأ</option>
+                            </select>
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
+        }
+
+        function removeBlock(index) {
+            blocks.splice(index, 1);
+            renderWorkspace();
+        }
+
+        async function publishExam() {
+            const title = document.getElementById('ex-title-input').value;
+            const code = document.getElementById('ex-code-input').value;
+            const time = document.getElementById('ex-time-input').value;
+            
+            if(!title || !code) {
+                alert('❌ يرجى كتابة عنوان وكود المادة');
+                return;
+            }
+            if(blocks.length === 0) {
+                alert('❌ يرجى إضافة سؤال واحد على الأقل');
+                return;
+            }
+
+            try {
+                console.log('جاري إنشاء الاختبار...');
+                
+                // إنشاء المادة
+                const { data: subject } = await _supabase.from('subjects').insert([{
+                    subject_name: title,
+                    access_code: code,
+                    teacher_id: currentUserId
+                }]).select();
+                
+                // إنشاء الاختبار
+                const { data: exam } = await _supabase.from('exams').insert([{
+                    title: title,
+                    subject_id: subject[0].id,
+                    exam_layout: { blocks: blocks, duration: time }
+                }]).select();
+                
+                // إنشاء الأسئلة
+                const quizData = blocks.map(b => ({
+                    exam_id: exam[0].id,
+                    question_text: b.content,
+                    q_type: b.type,
+                    options: b.options,
+                    correct_answer: b.correct
+                }));
+                
+                await _supabase.from('quizzes').insert(quizData);
+                
+                // عرض الروابط
+                const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                document.getElementById('res-student-url').innerText = `${baseUrl}/exam_page.html?eid=${exam[0].id}`;
+                document.getElementById('res-admin-url').innerText = `${baseUrl}/admin.html?eid=${exam[0].id}`;
+                
+                document.getElementById('success-modal').style.display = 'flex';
+                alert('🎉 تم نشر الاختبار بنجاح!');
+                
+            } catch (error) {
+                console.error('خطأ:', error);
+                alert('❌ حدث خطأ: ' + error.message);
+            }
+        }
+
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert('✅ تم نسخ الرابط');
+        }
+
+        function exportToPDF() {
+            if (blocks.length === 0) {
+                alert('❌ لا يوجد أسئلة لتصديرها!');
+                return;
+            }
+
+            const title = document.getElementById('ex-title-input').value || 'اختبار غير مسمى';
+            const code = document.getElementById('ex-code-input').value || 'N/A';
+            const time = document.getElementById('ex-time-input').value || '30';
+
+            let content = `
+                <html dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: 'Cairo', sans-serif; margin: 20px; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+                        .exam-info { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 30px; }
+                        .question { margin-bottom: 30px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; }
+                        .question-title { font-weight: bold; color: #2563eb; margin-bottom: 10px; }
+                        .options { margin: 15px 0; }
+                        .option { margin: 8px 0; padding: 8px; background: #f0f7ff; border-radius: 5px; }
+                        .points { background: #fef3c7; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="nav-links">
+                <a href="teacher_dashboard.html">لوحة المعلم</a>
+                <a href="exam_codes.html">أكواد الاختبارات</a>
+                <a href="teacher_courses.html">الكورسات</a>
+                <a href="home.html">الصفحة الرئيسية</a>
+            </div>
+                    <div class="header">
+                        <h1>${title}</h1>
+                        <p>منصة القياسات الذكية - MaaS</p>
+                    </div>
+                    <div class="exam-info">
+                        <strong>كود الاختبار:</strong> ${code}<br>
+                        <strong>المدة:</strong> ${time} دقيقة<br>
+                        <strong>عدد الأسئلة:</strong> ${blocks.length}<br>
+                        <strong>الدرجة الكلية:</strong> ${blocks.reduce((sum, b) => sum + (b.points || 1), 0)}
+                    </div>
+            `;
+
+            blocks.forEach((block, index) => {
+                content += `
+                    <div class="question">
+                        <div class="question-title">السؤال ${index + 1}: ${block.type === 'mcq' ? 'اختيار من متعدد' : block.type === 'truefalse' ? 'صح أو خطأ' : 'سؤال مقالي'}</div>
+                        <div>${block.content}</div>
+                        <div class="points">الدرجة: ${block.points || 1} نقطة</div>
+                `;
+
+                if (block.type === 'mcq') {
+                    content += '<div class="options">';
+                    block.options.forEach((opt, i) => {
+                        if (opt.trim()) {
+                            content += `<div class="option">${String.fromCharCode(1567 + i)}. ${opt}</div>`;
+                        }
+                    });
+                    content += '</div>';
+                } else if (block.type === 'truefalse') {
+                    content += `
+                        <div class="options">
+                            <div class="option">أ. صح</div>
+                            <div class="option">ب. خطأ</div>
+                        </div>
+                    `;
+                } else if (block.type === 'essay') {
+                    content += '<div style="margin-top: 20px;">_______________________________________________________________</div>';
+                }
+
+                content += '</div>';
+            });
+
+            content += `
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(content);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function printExam() {
+            exportToPDF();
+        }
+    </script>
+</body>
+</html>

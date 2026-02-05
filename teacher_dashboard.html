@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المعلم | منصة القياسات الذكية</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Header */
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .logo-main {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 900;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        .quick-actions h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-family: 'Cairo';
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .action-btn.success {
+            background: var(--success);
+        }
+
+        .action-btn.warning {
+            background: var(--warning);
+        }
+
+        .action-btn.info {
+            background: var(--info);
+        }
+
+        /* Recent Exams */
+        .recent-exams {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        .recent-exams h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .exam-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .exam-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .exam-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .exam-title {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .exam-meta {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mini-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mini-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .mini-btn.view {
+            background: var(--info);
+            color: white;
+        }
+
+        .mini-btn.edit {
+            background: var(--warning);
+            color: white;
+        }
+
+        .mini-btn.delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .welcome-message h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-left: none;
+                border-bottom: 2px solid rgba(255,255,255,0.2);
+            }
+            
+            main {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .user-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" class="logo">
+                <div class="logo-icon">MaaS</div>
+                <div class="logo-text">
+                    <span class="logo-main">قياسات ذكية</span>
+                    <span class="logo-sub">لوحة المعلم</span>
+                </div>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#stats">الإحصائيات</a>
+                <a href="#exams">اختباراتي</a>
+                <a href="teacher_editor.html">إنشاء اختبار</a>
+                <a href="exam_codes.html">أكواد الاختبارات</a>
+                <a href="teacher_courses.html">الكورسات</a>
+            </div>
+            
+            <div class="user-info">
+                <span>مرحباً بك</span>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="welcome-message">
+            <h2>مرحباً بك في لوحة التحكم</h2>
+            <p>من هنا يمكنك إدارة اختباراتك ومتابعة أداء الطلاب بسهولة</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">إجمالي الاختبارات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">الطلاب نشطون</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">معدد الأسئلة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0%</div>
+                <div class="stat-label">معدد الإكمال</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>إجراءات سريعة</h3>
+            <div class="action-buttons">
+                <a href="teacher_editor.html" class="action-btn">
+                    <span>➕ إنشاء اختبار جديد</span>
+                </a>
+                <a href="#" class="action-btn success">
+                    <span>📊 عرض التقارير</span>
+                </a>
+                <a href="#" class="action-btn warning">
+                    <span>� إدارة الكورسات</span>
+                </a>
+                <a href="#" class="action-btn info">
+                    <span>⚙️ الإعدادات</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="recent-exams">
+            <h3>اختباراتي الأخيرة</h3>
+            <ul class="exam-list" id="exam-list">
+                <li class="exam-item">
+                    <div>
+                        <div class="exam-title">لا توجد اختبارات بعد</div>
+                        <div class="exam-meta">لم يتم إنشاء أي اختبارات بعد</div>
+                    </div>
+                    <div class="exam-actions">
+                        <button class="mini-btn view">👁 عرض</button>
+                        <button class="mini-btn edit">✏️ تعديل</button>
+                        <button class="mini-btn delete">🗑️ حذف</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient('https://hnldjfcvztnrhkwjmetf.supabase.co', 'sb_publishable_ldtY51QgRs0yg8sxnqhIkA_0qKvVXMU');
+        let currentUserId = null;
+
+        // Check authentication and get user info
+        (async function checkAuth() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUserId = session.user.id;
+            
+            // Update user info display
+            const userMetadata = session.user.user_metadata || {};
+            const displayName = userMetadata.full_name || 'المعلم';
+            document.querySelector('.user-info span').textContent = displayName;
+            
+            // Load teacher data
+            await loadTeacherData();
+        })();
+
+        // Load teacher statistics
+        async function loadTeacherData() {
+            try {
+                // Get teacher's exams count
+                const { data: exams } = await _supabase
+                    .from('exams')
+                    .select('id, title, created_at')
+                    .eq('teacher_id', currentUserId);
+                
+                // Get student count
+                const { data: studentResults } = await _supabase
+                    .from('student_results')
+                    .select('id')
+                    .in('exam_id', exams.map(e => e.id));
+                
+                // Get questions count
+                const { data: questions } = await _supabase
+                    .from('quizzes')
+                    .select('id')
+                    .in('exam_id', exams.map(e => e.id));
+                
+                // Update stats
+                document.querySelector('.stat-card:nth-child .stat-number').textContent = exams.length;
+                document.querySelector('.stat-card:nth-child .stat-number').textContent = studentResults.length;
+                document.querySelector('.stat-card:nth-child .stat-number').textContent = questions.length;
+                
+                // Calculate completion rate
+                const completionRate = studentResults.length > 0 ? 
+                    Math.round((studentResults.filter(r => r.final_score !== null).length / studentResults.length) * 100) : 0;
+                document.querySelector('.stat-card:last-child .stat-number').textContent = completionRate + '%';
+                
+                // Load recent exams
+                loadRecentExams();
+                
+            } catch (error) {
+                console.error('Error loading teacher data:', error);
+            }
+        }
+
+        // Load recent exams
+        async function loadRecentExams() {
+            try {
+                const { data: exams } = await _supabase
+                    .from('exams')
+                    .select('id, title, created_at')
+                    .eq('teacher_id', currentUserId)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const examList = document.getElementById('exam-list');
+                examList.innerHTML = '';
+                
+                if (exams.length === 0) {
+                    examList.innerHTML = `
+                        <li class="exam-item">
+                            <div>
+                                <div class="exam-title">لا توجد اختبارات بعد</div>
+                                <div class="exam-meta">لم يتم إنشاء أي اختبارات بعد</div>
+                            </div>
+                            <div class="exam-actions">
+                                <button class="mini-btn view">👁 عرض</button>
+                                <button class="mini-btn edit">✏️ تعديل</button>
+                                <button class="mini-btn delete">🗑️ حذف</button>
+                            </div>
+                        </li>
+                    `;
+                } else {
+                    exams.forEach(exam => {
+                        const li = document.createElement('li');
+                        li.className = 'exam-item';
+                        li.innerHTML = `
+                            <div>
+                                <div class="exam-title">${exam.title}</div>
+                                <div class="exam-meta">${new Date(exam.created_at).toLocaleDateString('ar-SA')}</div>
+                            </div>
+                            <div class="exam-actions">
+                                <button class="mini-btn view" onclick="viewExam('${exam.id}')">👁 عرض</button>
+                                <button class="mini-btn edit" onclick="editExam('${exam.id}')">✏️ تعديل</button>
+                                <button class="mini-btn delete" onclick="deleteExam('${exam.id}')">🗑️ حذف</button>
+                            </div>
+                        `;
+                        examList.appendChild(li);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error loading recent exams:', error);
+            }
+        }
+
+        // View exam
+        function viewExam(examId) {
+            window.open(`exam_page.html?eid=${examId}`, '_blank');
+        }
+
+        // Edit exam
+        function editExam(examId) {
+            window.open(`teacher_editor.html?edit=${examId}`, '_blank');
+        }
+
+        // Delete exam
+        async function deleteExam(examId) {
+            if (confirm('هل أنت متأكد من حذف هذا الاختبار؟')) {
+                try {
+                    await _supabase.from('exams').delete().eq('id', examId);
+                    await _supabase.from('quizzes').delete().eq('exam_id', examId));
+                    await _supabase.from('student_results').delete().eq('exam_id', examId));
+                    
+                    alert('✅ تم حذف الاختبار بنجاح');
+                    loadRecentExams();
+                    loadTeacherData();
+                } catch (error) {
+                    alert('❌ خطأ في حذف الاختبار: ' + error.message);
+                }
+            }
+        }
+
+        // Export Functions
+        function exportToPDF() {
+            alert('🔧 وظيفة التصدير قيد التطوير حالياً!');
+        }
+
+        function exportToWord() {
+            alert('🔧 وظيفة التصدير لـ Word قيد التطوير حالياً!');
+        }
+
+        function printExam() {
+            alert('🔧 وظيفة الطباعة قيد التطوير حالياً!');
+        }
+
+        // Logout function
+        async function logout() {
+            await _supabase.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

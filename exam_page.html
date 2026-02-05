@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الطالب | نظام الاختبارات المطور 2026</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad)'/><text x='50' y='65' font-family='Arial, sans-serif' font-size='40' font-weight='900' fill='white' text-anchor='middle'>MaaS</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text-main: #1e293b;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            margin: 0;
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* شريط المعلومات العلوي */
+        .exam-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-bottom: 4px solid var(--primary);
+        }
+
+        .timer-container {
+            background: #fff1f2;
+            color: var(--danger);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.5rem;
+            border: 2px solid #fecdd3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* شاشات الانتقال */
+        .screen { display: none; padding: 50px 20px; max-width: 1000px; margin: 0 auto; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* تنسيق بطاقات الأسئلة */
+        .question-card {
+            background: var(--card);
+            border-radius: 30px;
+            padding: 45px;
+            margin-bottom: 60px; /* مباعدة ضخمة لمنع التداخل */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .passage-content {
+            background: #fffbeb;
+            border-right: 10px solid var(--warning);
+            padding: 35px;
+            border-radius: 20px;
+            line-height: 2;
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            color: #451a03;
+        }
+
+        .question-header {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: #0f172a;
+            display: flex;
+            gap: 15px;
+        }
+
+        .option-box {
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+        }
+
+        .option-box:hover { border-color: var(--primary); background: #f0f7ff; }
+        .option-box.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 25px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            font-family: 'Cairo';
+            font-size: 1.1rem;
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        /* الأزرار */
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn-main:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(67,97,238,0.2); }
+
+        /* شاشة النتيجة والانتظار */
+        .status-card { text-align: center; padding: 60px; }
+        .score-display {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--success);
+            margin: 20px 0;
+            text-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            width: 80px; height: 80px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="exam-nav" style="display: none;">
+        <div>
+            <strong id="st-name-display" style="font-size: 1.2rem; color: var(--primary);">--</strong><br>
+            <small id="ex-title-display" style="color: #64748b; font-weight: 700;">--</small>
+        </div>
+        <div class="timer-container">
+            <span id="timer-icon">⏳</span>
+            <span id="timer-clock">00:00</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="exam_codes.html" class="btn" style="background: var(--info); padding: 8px 16px; font-size: 0.9rem;">
+                🔙 العودة للأكواد
+            </a>
+            <a href="home.html" class="btn" style="background: var(--secondary); padding: 8px 16px; font-size: 0.9rem;">
+                🏠 الرئيسية
+            </a>
+        </div>
+    </div>
+
+    <div id="screen-login" class="screen active">
+        <div class="question-card status-card">
+            <h1 style="font-weight: 900; font-size: 2.5rem; color: var(--primary);">مرحباً بك في المنصة 👋</h1>
+            <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 40px;">يرجى إدخال اسمك الثلاثي لبدء الاختبار الرسمي</p>
+            
+            <div style="max-width: 400px; margin: 0 auto;">
+                <input type="text" id="student-name-input" placeholder="اكتب اسمك هنا..." 
+                       style="text-align: center; font-size: 1.2rem; margin-bottom: 25px; border-width: 3px;">
+                <button class="btn-main" onclick="startExam()">دخول الاختبار 🔓</button>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 0.9rem; color: var(--danger);">* بمجرد الضغط على البدء، سيبدأ الوقت في التنازل.</p>
+        </div>
+    </div>
+
+    <div id="screen-exam" class="screen">
+        <div id="dynamic-questions-container">
+            </div>
+        
+        <div style="margin-top: 80px; padding-bottom: 100px;">
+            <button class="btn-main" style="background: var(--success);" onclick="submitExam()">إرسال الإجابات النهائية وتأكيد التسليم 🚀</button>
+        </div>
+    </div>
+
+    <div id="screen-waiting" class="screen">
+        <div class="question-card status-card">
+            <div style="font-size: 5rem;">📝</div>
+            <h1 style="color: var(--primary); font-weight: 900;">تم استلام إجاباتك!</h1>
+            <p style="font-size: 1.2rem; color: #475569;">إجاباتك الآن في عهدة المعلم للمراجعة والتصحيح.</p>
+            
+            <div class="loader"></div>
+            
+            <p style="font-weight: 700; color: var(--warning);">يرجى عدم إغلاق الصفحة.. ستظهر درجتك هنا تلقائياً فور رصدها.</p>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="question-card status-card">
+            <div style="font-size: 5rem;">🎓</div>
+            <h1 style="margin-bottom: 10px;">انتهى الاختبار!</h1>
+            <p style="color: #64748b;">نتيجة الطالب: <span id="res-student-name" style="color: var(--text-main); font-weight: 800;"></span></p>
+            
+            <div class="score-display" id="final-score-box">0</div>
+            
+            <h2 style="color: #64748b; margin-top: 0;">من إجمالي الدرجة المحددة</h2>
+            
+            <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
+                <button class="btn-main" style="width: auto; padding: 15px 40px;" onclick="window.print()">طباعة النتيجة 📄</button>
+                <button class="btn-main" style="width: auto; padding: 15px 40px; background: #64748b;" onclick="location.reload()">خروج</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const _supabase = supabase.createClient('https://hnldjfcvztnrhkwjmetf.supabase.co', 'sb_publishable_ldtY51QgRs0yg8sxnqhIkA_0qKvVXMU');
+    const examId = new URLSearchParams(window.location.search).get('eid');
+    
+    let studentName = "";
+    let studentEmail = "";
+    let answers = {};
+    let timeLeft = 0;
+    let originalTime = 0;
+    let timerInterval;
+
+    // 1. بدء الاختبار وجلب البيانات
+    async function startExam() {
+        studentName = document.getElementById('student-name-input').value;
+        if (!studentName || studentName.length < 3) return alert("يرجى إدخال الاسم كاملاً!");
+        if (!examId) return alert("عذراً، رابط الاختبار غير صالح.");
+
+        try {
+            // محاولة جلب البيانات من قاعدة البيانات
+            let exam;
+            try {
+                const { data: examData, error } = await _supabase.from('exams').select('*').eq('id', examId).single();
+                if (!error && examData) {
+                    exam = examData;
+                }
+            } catch (dbError) {
+                console.log('Database error, using sample data');
+            }
+
+            // إذا لم يتم العثور على البيانات، استخدم البيانات التجريبية
+            if (!exam) {
+                exam = getSampleExamData(examId);
+                if (!exam) {
+                    throw new Error("لم يتم العثور على الاختبار.");
+                }
+            }
+
+            // ضبط الواجهة
+            document.getElementById('st-name-display').innerText = studentName;
+            document.getElementById('ex-title-display').innerText = exam.title;
+            document.getElementById('screen-login').classList.remove('active');
+            document.getElementById('screen-exam').classList.add('active');
+            document.querySelector('.exam-nav').style.display = 'flex';
+
+            // ضبط الوقت
+            timeLeft = (exam.exam_layout?.duration || 30) * 60;
+            originalTime = timeLeft;
+            runTimer();
+
+            // بناء المحتوى
+            renderExamBlocks(exam.exam_layout?.blocks || exam.blocks || []);
+
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    // بيانات تجريبية للاختبارات
+    function getSampleExamData(examId) {
+        const sampleExams = {
+            'test1': {
+                id: 'test1',
+                title: 'اختبار الرياضيات التجريبي',
+                exam_layout: {
+                    duration: 30,
+                    blocks: [
+                        {
+                            id: 'q1',
+                            type: 'mcq',
+                            content: 'ما هي نتيجة 5 + 3؟',
+                            options: ['7', '8', '9', '10'],
+                            correct: '8',
+                            points: 1
+                        },
+                        {
+                            id: 'q2',
+                            type: 'mcq',
+                            content: 'ما هو مربع الرقم 4؟',
+                            options: ['12', '14', '16', '18'],
+                            correct: '16',
+                            points: 1
+                        },
+                        {
+                            id: 'q3',
+                            type: 'truefalse',
+                            content: 'العدد 7 هو عدد أولي',
+                            correct: 'صح',
+                            points: 1
+                        }
+                    ]
+                }
+            },
+            'test2': {
+                id: 'test2',
+                title: 'اختبار اللغة العربية',
+                exam_layout: {
+                    duration: 45,
+                    blocks: [
+                        {
+                            id: 'q1',
+                            type: 'mcq',
+                            content: 'ما هو جمع كلمة "كتاب"؟',
+                            options: ['كتب', 'كتابات', 'كتائب', 'كاتبات'],
+                            correct: 'كتب',
+                            points: 1
+                        },
+                        {
+                            id: 'q2',
+                            type: 'mcq',
+                            content: 'ما هو المضاد لكلمة "ليل"؟',
+                            options: ['نهار', 'صباح', 'مساء', 'فجر'],
+                            correct: 'نهار',
+                            points: 1
+                        }
+                    ]
+                }
+            },
+            'test3': {
+                id: 'test3',
+                title: 'اختبار العلوم العامة',
+                exam_layout: {
+                    duration: 60,
+                    blocks: [
+                        {
+                            id: 'q1',
+                            type: 'mcq',
+                            content: 'كم عدد الكواكب في المجموعة الشمسية؟',
+                            options: ['7', '8', '9', '10'],
+                            correct: '8',
+                            points: 1
+                        },
+                        {
+                            id: 'q2',
+                            type: 'truefalse',
+                            content: 'الأكسجين ضروري للحياة',
+                            correct: 'صح',
+                            points: 1
+                        }
+                    ]
+                }
+            }
+        };
+
+        return sampleExams[examId] || null;
+    }
+
+    // 2. توزيع الأسئلة في الصفحة
+    function renderExamBlocks(blocks) {
+        const container = document.getElementById('dynamic-questions-container');
+        blocks.forEach((block, index) => {
+            const blockDiv = document.createElement('div');
+            
+            if (block.type === 'passage') {
+                blockDiv.className = 'passage-content';
+                blockDiv.innerHTML = `<strong>📖 نص القطعة:</strong><br><p>${block.content}</p>`;
+            } else {
+                blockDiv.className = 'question-card';
+                let html = `
+                    <div class="question-header">
+                        <span style="color: var(--primary);">س${index + 1}:</span>
+                        <span>${block.content}</span>
+                    </div>
+                `;
+
+                if (block.type === 'mcq') {
+                    html += `<div style="display: grid; gap: 15px;">`;
+                    block.options.filter(opt => opt.trim() !== "").forEach(opt => {
+                        html += `
+                            <div class="option-box" onclick="selectOption(this, '${block.id}', '${opt}')">
+                                <div class="radio-circle"></div>
+                                <span>${opt}</span>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `<textarea placeholder="اكتب إجابتك المقالية بالتفصيل هنا..." oninput="saveEssayAnswer('${block.id}', this.value)"></textarea>`;
+                }
+                blockDiv.innerHTML = html;
+            }
+            container.appendChild(blockDiv);
+        });
+    }
+
+    // 3. التعامل مع الاختيارات
+    function selectOption(el, qId, val) {
+        // إزالة التحديد من باقي الخيارات لنفس السؤال
+        const parent = el.parentElement;
+        parent.querySelectorAll('.option-box').forEach(box => box.classList.remove('selected'));
+        el.classList.add('selected');
+        answers[qId] = val;
+    }
+
+    function saveEssayAnswer(qId, val) {
+        answers[qId] = val;
+    }
+
+    // 4. نظام التوقيت
+    function runTimer() {
+        timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("انتهى الوقت! سيتم تسليم إجاباتك تلقائياً.");
+                submitExam(true);
+            }
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer-clock').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timeLeft--;
+        }, 1000);
+    }
+
+    // 5. تسليم الاختبار
+    async function submitExam(auto = false) {
+        if (!auto && !confirm("هل أنت متأكد من تسليم الاختبار؟ لا يمكن التراجع بعد ذلك.")) return;
+
+        clearInterval(timerInterval);
+        document.getElementById('screen-exam').classList.remove('active');
+        document.querySelector('.exam-nav').style.display = 'none';
+        document.getElementById('screen-waiting').classList.add('active');
+
+        try {
+            // حساب الإجابات الصحيحة والدرجة
+            let correctAnswers = 0;
+            let totalPoints = 0;
+            let earnedPoints = 0;
+            
+            // جلب بيانات الاختبار والأسئلة
+            const { data: examData } = await _supabase
+                .from('exams')
+                .select('exam_layout')
+                .eq('id', examId)
+                .single();
+            
+            if (examData && examData.exam_layout) {
+                const blocks = examData.exam_layout.blocks || [];
+                const questions = blocks.filter(b => b.type !== 'passage');
+                
+                questions.forEach(question => {
+                    const studentAnswer = answers[question.id];
+                    const correctAnswer = question.correct;
+                    const questionPoints = question.points || 1;
+                    
+                    totalPoints += questionPoints;
+                    
+                    // التحقق من الإجابة الصحيحة
+                    if (studentAnswer && studentAnswer === correctAnswer) {
+                        correctAnswers++;
+                        earnedPoints += questionPoints;
+                    }
+                });
+            }
+            
+            const percentage = totalPoints > 0 ? (earnedPoints / totalPoints * 100).toFixed(2) : 0;
+
+            const { data, error } = await _supabase.from('student_results').insert([{
+                exam_id: examId,
+                student_name: studentName,
+                student_email: null,
+                answers: answers,
+                score: earnedPoints,
+                total_questions: questions.length,
+                correct_answers: correctAnswers,
+                percentage: parseFloat(percentage),
+                time_taken: Math.floor((originalTime - timeLeft) / 60), // بالدقائق
+                submitted_at: new Date().toISOString()
+            }]).select();
+
+            if (error) throw error;
+            
+            // عرض النتيجة فوراً للطالب
+            showFinalResult({
+                student_name: studentName,
+                score: earnedPoints,
+                total_questions: questions.length,
+                correct_answers: correctAnswers,
+                percentage: percentage
+            });
+
+        } catch (err) {
+            console.error("Submit Error:", err);
+            alert("فشل الإرسال: " + err.message);
+        }
+    }
+
+    // 6. مراقبة رصد الدرجة من المعلم
+    function startMonitoringResult(submissionId) {
+        const monitorInterval = setInterval(async () => {
+            const { data, error } = await _supabase
+                .from('students')
+                .select('final_score, status, student_name')
+                .eq('id', submissionId)
+                .single();
+
+            if (data && data.status === 'approved') {
+                clearInterval(monitorInterval);
+                showFinalResult(data);
+            }
+        }, 4000); // يفحص كل 4 ثوانٍ
+    }
+
+    function showFinalResult(data) {
+        document.getElementById('screen-waiting').classList.remove('active');
+        document.getElementById('screen-result').classList.add('active');
+        document.getElementById('res-student-name').innerText = data.student_name;
+        document.getElementById('final-score-box').innerText = data.score;
+        
+        // عرض معلومات إضافية
+        const resultInfo = document.querySelector('.score-display').nextElementSibling;
+        if (resultInfo) {
+            resultInfo.innerHTML = `
+                <p style="color: #64748b; margin-top: 10px;">
+                    الإجابات الصحيحة: ${data.correct_answers} من ${data.total_questions} (${data.percentage}%)
+                </p>
+            `;
+        }
+    }
+</script>
+</body>
+</html>

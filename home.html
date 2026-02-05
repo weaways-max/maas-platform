@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة القياسات الذكية</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="منصة القياسات الذكية - نظام اختبارات وكورسات متقدم للمعلمين والطلاب">
+    <meta name="keywords" content="اختبارات, كورسات, تعليم, تقييم, منصة تعليمية, قياسات ذكية, اختبارات اونلاين, كورسات اونلاين">
+    <meta name="author" content="منصة القياسات الذكية">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="منصة القياسات الذكية">
+    <meta property="og:description" content="نظام اختبارات وكورسات متقدم للمعلمين والطلاب">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.vercel.app">
+    <meta property="og:image" content="https://your-domain.vercel.app/og-image.jpg">
+    <meta property="og:site_name" content="منصة القياسات الذكية">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="منصة القياسات الذكية">
+    <meta name="twitter:description" content="نظام اختبارات وكورسات متقدم للمعلمين والطلاب">
+    <meta name="twitter:image" content="https://your-domain.vercel.app/og-image.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://your-domain.vercel.app">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --accent: #7c3aed;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--danger) 100%);
+            --gradient-success: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            --gradient-info: linear-gradient(135deg, var(--info) 0%, #0e7490 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation Header */
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        header:hover {
+            box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .logo-main {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: var(--gradient);
+            border-radius: 22px;
+            z-index: -1;
+            opacity: 0.6;
+            filter: blur(10px);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(10deg) scale(1.1);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.6);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a:hover::before {
+            width: 80%;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.5);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --dark: #f8fafc;
+            --light: #1e293b;
+        }
+
+        body.dark-mode {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        body.dark-mode header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+        }
+
+        body.dark-mode .features {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+        }
+
+        body.dark-mode .feature-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .pricing-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .question-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        /* Enhanced Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Enhanced Hero Section */
+        .hero-content h1 {
+            animation: slideInDown 1s ease-out;
+        }
+
+        .hero-content p {
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        .hero-buttons {
+            animation: fadeInScale 1s ease-out 0.6s both;
+        }
+
+        /* Enhanced Feature Cards */
+        .feature-card {
+            animation: fadeInScale 0.8s ease-out both;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Enhanced Pricing Cards */
+        .pricing-card {
+            animation: fadeInScale 0.8s ease-out both;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pricing-card:nth-child(1) { animation-delay: 0.2s; }
+        .pricing-card:nth-child(2) { animation-delay: 0.4s; }
+        .pricing-card:nth-child(3) { animation-delay: 0.6s; }
+
+        /* Enhanced Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .stat-card:nth-child(1) {
+            border-image: linear-gradient(135deg, var(--primary), var(--accent)) 1;
+        }
+
+        .stat-card:nth-child(2) {
+            border-image: linear-gradient(135deg, var(--accent), var(--warning)) 1;
+        }
+
+        .stat-card:nth-child(3) {
+            border-image: linear-gradient(135deg, var(--warning), var(--success)) 1;
+        }
+
+        .stat-card:nth-child(4) {
+            border-image: linear-gradient(135deg, var(--success), var(--info)) 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Enhanced Testimonials */
+        .testimonials {
+            padding: 100px 2rem;
+            background: linear-gradient(135deg, var(--light) 0%, #e0f2fe 50%, var(--light) 100%);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.3;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #475569;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .testimonial-info h4 {
+            margin: 0;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .testimonial-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced Footer */
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 60px 2rem 30px;
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section ul li a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: float 8s infinite linear;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--warning) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, -100px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: slideInDown 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 0.9;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 2rem;
+            background: linear-gradient(135deg, var(--light) 0%, #e0f2fe 50%, var(--light) 100%);
+            position: relative;
+        }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .feature-card:nth-child(1) {
+            border-image: linear-gradient(135deg, var(--primary), var(--accent)) 1;
+        }
+
+        .feature-card:nth-child(2) {
+            border-image: linear-gradient(135deg, var(--accent), var(--warning)) 1;
+        }
+
+        .feature-card:nth-child(3) {
+            border-image: linear-gradient(135deg, var(--warning), var(--success)) 1;
+        }
+
+        .feature-card:nth-child(4) {
+            border-image: linear-gradient(135deg, var(--success), var(--info)) 1;
+        }
+
+        .feature-card:nth-child(5) {
+            border-image: linear-gradient(135deg, var(--info), var(--primary)) 1;
+        }
+
+        .feature-card:nth-child(6) {
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
+        }
+
+        .feature-card:nth-child(7) {
+            border-image: linear-gradient(135deg, var(--secondary), var(--accent)) 1;
+        }
+
+        .feature-card:nth-child(8) {
+            border-image: linear-gradient(135deg, var(--accent), var(--success)) 1;
+        }
+
+        .feature-card:nth-child(9) {
+            border-image: linear-gradient(135deg, var(--success), var(--warning)) 1;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--warning), var(--success), var(--info));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:nth-child(1) .feature-icon {
+            background: var(--gradient-accent);
+        }
+
+        .feature-card:nth-child(2) .feature-icon {
+            background: var(--gradient-warning);
+        }
+
+        .feature-card:nth-child(3) .feature-icon {
+            background: var(--gradient-success);
+        }
+
+        .feature-card:nth-child(4) .feature-icon {
+            background: var(--gradient-info);
+        }
+
+        .feature-card:nth-child(5) .feature-icon {
+            background: var(--gradient);
+        }
+
+        .feature-card:nth-child(6) .feature-icon {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+        }
+
+        .feature-card:nth-child(7) .feature-icon {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+        }
+
+        .feature-card:nth-child(8) .feature-icon {
+            background: linear-gradient(135deg, var(--success), var(--info));
+        }
+
+        .feature-card:nth-child(9) .feature-icon {
+            background: linear-gradient(135deg, var(--warning), var(--danger));
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: rotate(10deg) scale(1.1);
+            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.4);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            transition: color 0.3s ease;
+        }
+
+        .feature-card:hover h3 {
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+
+        .feature-card:hover p {
+            color: var(--dark);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: white;
+            padding: 80px 2rem;
+        }
+
+        .pricing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: var(--light);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 1rem 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .pricing-card.featured .pricing-features li {
+            border-bottom-color: rgba(255,255,255,0.2);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 900;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <header>
+        <nav>
+            <a href="#" class="logo">
+                <div class="logo-icon">MaaS</div>
+                <div class="logo-text">
+                    <span class="logo-main">قياسات ذكية</span>
+                    <span class="logo-sub">حيث العلم يلتقي بالإبداع</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="#features">المميزات</a>
+                <a href="#about">عن المنصة</a>
+                <a href="#contact">اتصل بنا</a>
+                <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+            </div>
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">الوضع الليلي</span>
+            </button>
+            <a href="#" class="btn-primary">ابدأ مجانًا</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>قيّم. طوّر. تفوّق</h1>
+            <p>منصة MaaS للقياسات الذكية - حيث العلم يلتقي بالإبداع</p>
+            <div class="hero-buttons">
+                <a href="login.html" class="btn-primary">ابدأ رحلتك</a>
+                <a href="exam_codes.html" class="btn-secondary">دخول اختبار بالكود</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">طالب نشط</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">معلم محترف</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">اختبار منشور</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">رضا العملاء</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2 class="section-title">مميزات استثنائية</h2>
+        <p class="section-subtitle">كل ما تحتاجه لإدارة منصة تعليمية متكاملة في مكان واحد</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>إنشاء اختبارات ذكية</h3>
+                <p>اختبارات متعددة الأنواع (اختياري، مقالي، قطعي) مع إمكانية التخصيص الكامل</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">�</div>
+                <h3>نظام كورسات متكامل</h3>
+                <p>إنشاء وإدارة الكورسات والدروس التعليمية مع تنظيم المحتوى بشكل احترافي</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>حسابات متعددة</h3>
+                <p>نظام متكامل للمعلمين والطلاب وأولياء الأمور مع صلاحيات متدرجة</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎥</div>
+                <h3>فيديوهات تعليمية</h3>
+                <p>رفع ومشاركة الفيديوهات التعليمية مع إمكانية البث المباشر والتسجيل</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">��</div>
+                <h3>تحليلات متقدمة</h3>
+                <p>رسوم بيانية تفاعلية وتقارير مفصلة عن أداء الطلاب والتقدم التعليمي</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>نظام شهادات</h3>
+                <p>إصدار شهادات إتمام الكورسات والاختبارات مع تصميمات احترافية</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">�</div>
+                <h3>جدول حصص ذكي</h3>
+                <p>تنظيم الجدول الدراسي مع تنبيهات تلقائية للطلاب والمعلمين</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>منتدى تعليمي</h3>
+                <p>مساحة تفاعلية للنقاشات التعليمية وطرح الأسئلة والإجابات</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3>آمن وموثوق</h3>
+                <p>تشفير البيانات وحماية الخصوصية مع نسخ احتياطي تلقائي</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="pricing-container">
+            <h2 class="section-title">باقات مرنة للجميع</h2>
+            <p class="section-subtitle">اختر الباقة التي تناسب احتياجاتك</p>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>مجاني</h3>
+                    <div class="price">0<span>/شهرياً</span></div>
+                    <ul class="pricing-features">
+                        <li>✓ 5 اختبارات شهرياً</li>
+                        <li>✓ 50 طالب كحد أقصى</li>
+                        <li>✓ 3 كورسات</li>
+                        <li>✓ تحليلات أساسية</li>
+                        <li>✓ 1 جيجا مساحة</li>
+                        <li>✓ دعم عبر البريد</li>
+                    </ul>
+                    <a href="#" class="btn-secondary" style="width: 100%; display: block;">ابدأ مجانًا</a>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">الأكثر شعبية</div>
+                    <h3>احترافي</h3>
+                    <div class="price">50<span>/شهرياً</span></div>
+                    <ul class="pricing-features">
+                        <li>✓ اختبارات غير محدودة</li>
+                        <li>✓ 500 طالب كحد أقصى</li>
+                        <li>✓ 20 كورس</li>
+                        <li>✓ تحليلات متقدمة</li>
+                        <li>✓ 10 جيجا مساحة</li>
+                        <li>✓ شهادات مخصصة</li>
+                        <li>✓ دعم فوري 24/7</li>
+                        <li>✓ تصدير البيانات</li>
+                    </ul>
+                    <a href="#" class="btn-primary" style="width: 100%; display: block;">اختر الباقة</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>مؤسسات</h3>
+                    <div class="price">150<span>/شهرياً</span></div>
+                    <ul class="pricing-features">
+                        <li>✓ كل مميزات الاحترافي</li>
+                        <li>✓ طلاب غير محدودين</li>
+                        <li>✓ كورسات غير محدودة</li>
+                        <li>✓ 5 حسابات معلمين</li>
+                        <li>✓ 100 جيجا مساحة</li>
+                        <li>✓ API مخصص</li>
+                        <li>✓ تدريب مخصص</li>
+                        <li>✓ نطاق فرعي خاص</li>
+                    </ul>
+                    <a href="#" class="btn-secondary" style="width: 100%; display: block;">تواصل معنا</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">ماذا يقول معلمونا</h2>
+            <p class="section-subtitle">آراء حقيقية من معلمين يستخدمون منصة MaaS</p>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"منصة رائعة! سهلة الاستخدام وتوفر كل ما أحتاجه لإنشاء اختبارات احترافية. الطلاب يحبون الواجهة الحديثة."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">أ</div>
+                        <div class="testimonial-info">
+                            <h4>أحمد محمد</h4>
+                            <p>معلم رياضيات</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"وفرت لي الكثير من الوقت في تصحيح الاختبارات. نظام النتائج التلقائي مذهل!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">س</div>
+                        <div class="testimonial-info">
+                            <h4>سارة أحمد</h4>
+                            <p>معلمة لغة عربية</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"أفضل منصة للقياسات الذكية. الدعم الفني ممتاز والمميزات متطورة باستمر."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">م</div>
+                        <div class="testimonial-info">
+                            <h4>محمد خالد</h4>
+                            <p>معلم علوم</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>منصة MaaS</h3>
+                <p>منصة القياسات الذكية الرائدة في المنطقة العربية</p>
+                <div style="margin-top: 1rem;">
+                    <a href="#" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                        <div class="logo-icon" style="width: 40px; height: 40px; font-size: 1rem;">MaaS</div>
+                        <span>قول بلاغي قوي</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <ul>
+                    <li><a href="home.html">الرئيسية</a></li>
+                    <li><a href="teacher_editor.html">إنشاء اختبار</a></li>
+                    <li><a href="exam_codes.html">الأكواد</a></li>
+                    <li><a href="login.html">تسجيل الدخول</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>المميزات</h3>
+                <ul>
+                    <li><a href="#features">محرر اختبارات</a></li>
+                    <li><a href="#pricing">الأسعار</a></li>
+                    <li><a href="#testimonials">آراء العملاء</a></li>
+                    <li><a href="#contact">اتصل بنا</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>الدعم الفني</h3>
+                <ul>
+                    <li><a href="mailto:support@maas.com">support@maas.com</a></li>
+                    <li><a href="tel:+966500000000">+966 500 000 000</a></li>
+                    <li><a href="#">مركز المساعدة</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 منصة MaaS. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (isDarkMode) {
+                icon.textContent = '🌙';
+                text.textContent = 'الوضع الليلي';
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'الوضع النهاري';
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-text').textContent = 'الوضع الليلي';
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards and pricing cards
+        document.querySelectorAll('.feature-card, .pricing-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

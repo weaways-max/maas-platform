@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أكواد الاختبارات | MaaS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><text x='50' y='40' font-family='Arial, sans-serif' font-size='24' font-weight='900' fill='white' text-anchor='middle'>MaaS</text><text x='50' y='65' font-family='Arial, sans-serif' font-size='8' font-weight='600' fill='white' text-anchor='middle'>قياسات ذكية</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1' /></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad)'/><text x='50' y='65' font-family='Arial, sans-serif' font-size='40' font-weight='900' fill='white' text-anchor='middle'>MaaS</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --accent: #f72585;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--danger) 100%);
+            --gradient-success: linear-gradient(135deg, var(--success) 0%, #00d084 100%);
+            --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #fb8500 100%);
+            --gradient-info: linear-gradient(135deg, var(--info) 0%, #3a86ff 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation Header */
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 2rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.6rem;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border: 2px solid var(--primary);
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        }
+
+        .search-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.5);
+        }
+
+        /* Codes Grid */
+        .codes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .code-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .code-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--warning), var(--success), var(--info));
+        }
+
+        .code-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .code-status {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .status-inactive {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .code-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .code-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .code-info-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .code-info-value {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .code-display {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-copy {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-link {
+            background: var(--gradient-info);
+            color: white;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 201, 240, 0.3);
+        }
+
+        .btn-admin {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 255, 165, 0.3);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #64748b;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .nav-links a {
+                font-size: 1rem;
+                padding: 0.3rem 0.8rem;
+            }
+            
+            .codes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-section {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <header>
+        <nav>
+            <a href="home.html" class="logo">
+                <div class="logo-icon">MaaS</div>
+                <span>قول بلاغي قوي</span>
+            </a>
+            <div class="nav-links">
+                <a href="home.html">الصفحة الرئيسية</a>
+                <a href="login.html">تسجيل الدخول</a>
+                <a href="#help">مساعدة</a>
+            </div>
+            <a href="login.html">تسجيل الدخول</a>
+            <a href="#" class="btn-primary" style="background: var(--gradient); color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 700;">لوحة التحكم</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>🎯 أكواد الاختبارات</h1>
+            <p>ابحث عن اختبار بالكود أو الاسم واحصل على الرابط المباشر</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text" class="search-input" id="searchInput" placeholder="ابحث بالكود أو اسم الاختبار...">
+            <button class="search-btn" onclick="searchExams()">🔍 بحث</button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>جاري تحميل البيانات...</p>
+        </div>
+
+        <!-- Codes Grid -->
+        <div id="codesGrid" class="codes-grid">
+            <!-- Codes will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h2>😔 لم يتم العثور على نتائج</h2>
+            <p>جرب البحث بكود أو اسم مختلف</p>
+            <a href="teacher_editor.html" class="btn btn-primary" style="background: var(--gradient); color: white;">إنشاء اختبار جديد</a>
+        </div>
+    </div>
+
+    <script>
+        // إعداد الاتصال بـ Supabase
+        const _supabase = supabase.createClient('https://hnldjfcvztnrhkwjmetf.supabase.co', 'sb_publishable_ldtY51QgRs0yg8sxnqhIkA_0qKvVXMU');
+        
+        let allExams = [];
+        let filteredExams = [];
+
+        // تحميل جميع الاختبارات عند تحميل الصفحة
+        async function loadExams() {
+            try {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('codesGrid').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+
+                const { data, error } = await _supabase
+                    .from('exams')
+                    .select(`
+                        id,
+                        title,
+                        created_at,
+                        is_active,
+                        subjects!inner(
+                            access_code,
+                            subject_name,
+                            teachers!inner(
+                                name,
+                                email
+                            )
+                        )
+                    `)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allExams = data || [];
+                filteredExams = allExams;
+                
+                displayExams();
+                
+            } catch (error) {
+                console.error('Error loading exams:', error);
+                alert('حدث خطأ في تحميل البيانات');
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // عرض الاختبارات
+        function displayExams() {
+            const grid = document.getElementById('codesGrid');
+            
+            if (filteredExams.length === 0) {
+                grid.style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            document.getElementById('emptyState').style.display = 'none';
+
+            grid.innerHTML = filteredExams.map(exam => {
+                const examCode = exam.subjects?.access_code || 'N/A';
+                const examTitle = exam.title;
+                const teacherName = exam.subjects?.teachers?.name || 'غير محدد';
+                const isActive = exam.is_active;
+                const createdDate = new Date(exam.created_at).toLocaleDateString('ar-SA');
+                
+                const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                const examUrl = `${baseUrl}/exam_page.html?eid=${exam.id}`;
+                const adminUrl = `${baseUrl}/admin.html?eid=${exam.id}`;
+
+                return `
+                    <div class="code-card">
+                        <div class="code-header">
+                            <h3 class="code-title">${examTitle}</h3>
+                            <span class="code-status ${isActive ? 'status-active' : 'status-inactive'}">
+                                ${isActive ? '✅ نشط' : '⏸️ غير نشط'}
+                            </span>
+                        </div>
+                        
+                        <div class="code-info">
+                            <div class="code-info-item">
+                                <span class="code-info-label">📚 المعلم:</span>
+                                <span class="code-info-value">${teacherName}</span>
+                            </div>
+                            <div class="code-info-item">
+                                <span class="code-info-label">📅 تاريخ الإنشاء:</span>
+                                <span class="code-info-value">${createdDate}</span>
+                            </div>
+                            <div class="code-info-item">
+                                <span class="code-info-label">📊 الحالة:</span>
+                                <span class="code-info-value">${isActive ? 'متاح للطلاب' : 'مغلق'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="code-display">
+                            🎯 ${examCode}
+                        </div>
+                        
+                        <div class="code-actions">
+                            <button class="btn btn-copy" onclick="copyCode('${examCode}')">
+                                📋 نسخ الكود
+                            </button>
+                            <button class="btn btn-link" onclick="copyLink('${examUrl}')">
+                                🔗 نسخ الرابط
+                            </button>
+                            <button class="btn btn-admin" onclick="window.open('${adminUrl}', '_blank')">
+                                📊 لوحة التحكم
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // البحث في الاختبارات
+        function searchExams() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                filteredExams = allExams;
+            } else {
+                filteredExams = allExams.filter(exam => {
+                    const title = exam.title?.toLowerCase() || '';
+                    const code = exam.subjects?.access_code?.toLowerCase() || '';
+                    const teacherName = exam.subjects?.teachers?.name?.toLowerCase() || '';
+                    
+                    return title.includes(searchTerm) || 
+                           code.includes(searchTerm) || 
+                           teacherName.includes(searchTerm);
+                });
+            }
+            
+            displayExams();
+        }
+
+        // نسخ الكود
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ تم نسخ الكود بنجاح!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('❌ فشل نسخ الكود');
+            });
+        }
+
+        // نسخ الرابط
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ تم نسخ الرابط بنجاح!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('❌ فشل نسخ الرابط');
+            });
+        }
+
+        // البحث عند الضغط على Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchExams();
+            }
+        });
+
+        // تحميل البيانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadExams);
+        
+        // إضافة بيانات تجريبية للاختبار
+        function addSampleData() {
+            const sampleExams = [
+                {
+                    id: 'test1',
+                    title: 'اختبار الرياضيات التجريبي',
+                    subject_name: 'رياضيات',
+                    access_code: 'TEST2024',
+                    created_at: new Date().toISOString(),
+                    duration: 30,
+                    questions_count: 10
+                },
+                {
+                    id: 'test2', 
+                    title: 'اختبار اللغة العربية',
+                    subject_name: 'عربي',
+                    access_code: 'ARABIC2024',
+                    created_at: new Date().toISOString(),
+                    duration: 45,
+                    questions_count: 15
+                },
+                {
+                    id: 'test3',
+                    title: 'اختبار العلوم العامة',
+                    subject_name: 'علوم',
+                    access_code: 'SCIENCE2024',
+                    created_at: new Date().toISOString(),
+                    duration: 60,
+                    questions_count: 20
+                }
+            ];
+            
+            // إضافة البيانات التجريبية للعرض
+            window.sampleExams = sampleExams;
+        }
+        
+        // تحديث دالة البحث لتشمل البيانات التجريبية
+        function searchExams() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('results');
+            
+            if (!searchTerm) {
+                resultsContainer.innerHTML = '<p style="text-align: center; color: #64748b;">يرجى إدخال كود أو اسم الاختبار للبحث</p>';
+                return;
+            }
+            
+            // البحث في البيانات التجريبية
+            const sampleResults = window.sampleExams || [];
+            const filtered = sampleResults.filter(exam => 
+                exam.access_code.toLowerCase().includes(searchTerm) ||
+                exam.title.toLowerCase().includes(searchTerm) ||
+                exam.subject_name.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
+                        <h3 style="color: #64748b; margin-bottom: 10px;">لم يتم العثور على نتائج</h3>
+                        <p style="color: #94a3b8;">جرب البحث بكود آخر أو اسم الاختبار</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // عرض النتائج
+            resultsContainer.innerHTML = filtered.map(exam => `
+                <div class="exam-card">
+                    <div class="exam-header">
+                        <div class="exam-title">${exam.title}</div>
+                        <div class="exam-meta">
+                            <span class="exam-code">${exam.access_code}</span>
+                            <span class="exam-subject">${exam.subject_name}</span>
+                        </div>
+                    </div>
+                    <div class="exam-details">
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${exam.duration} دقيقة</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>${exam.questions_count} سؤال</span>
+                        </div>
+                    </div>
+                    <div class="exam-actions">
+                        <button class="btn btn-primary" onclick="startExam('${exam.id}')">
+                            <i class="fas fa-play"></i>
+                            بدء الاختبار
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyCode('${exam.access_code}')">
+                            <i class="fas fa-copy"></i>
+                            نسخ الكود
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // بدء الاختبار
+        function startExam(examId) {
+            const exam = (window.sampleExams || []).find(e => e.id === examId);
+            if (exam) {
+                // إنشاء رابط الاختبار
+                const examUrl = `exam_page.html?eid=${examId}`;
+                window.open(examUrl, '_blank');
+            }
+        }
+        
+        // تحميل البيانات التجريبية عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            addSampleData();
+            loadExams();
+        });
+    </script>
+</body>
+</html>

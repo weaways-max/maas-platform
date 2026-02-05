@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://your-domain.vercel.app/sitemap.xml
+
+# Allow search engines to crawl all pages
+Allow: /login.html
+Allow: /teacher_dashboard.html
+Allow: /teacher_editor.html
+Allow: /teacher_courses.html
+Allow: /student_dashboard.html
+Allow: /student_profile.html
+Allow: /student_library.html
+Allow: /student_courses.html
+Allow: /exam_codes.html
+Allow: /exam_page.html
+
+# Block access to sensitive files
+Disallow: /database_fix.sql
+Disallow: /database_setup.sql
+Disallow: /sample_data.sql
+Disallow: /deployment_guide.md
+Disallow: /free_deployment.md
+Disallow: /vercel_seo_deployment.md
+
+# Crawl delay (optional)
+Crawl-delay: 1
